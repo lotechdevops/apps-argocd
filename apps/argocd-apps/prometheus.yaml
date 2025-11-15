@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: observabilidade
   
   source:
     repoURL: https://github.com/lotechdevops/apps-argocd.git
