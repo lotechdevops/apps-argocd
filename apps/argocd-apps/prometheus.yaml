@@ -1,10 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: prometheus
+  name: prometheus-stack
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/component: monitoring
 spec:
   project: observabilidade
   
@@ -16,7 +19,7 @@ spec:
       releaseName: prometheus
       valueFiles:
         - values.yaml
-
+  
   destination:
     server: https://kubernetes.default.svc
     namespace: observabilidade
@@ -30,14 +33,23 @@ spec:
       - CreateNamespace=true
       - ServerSideApply=true
     retry:
-      limit: 3
+      limit: 5
       backoff:
         duration: 5s
         factor: 2
         maxDuration: 3m
   
+  # Ignora diferenças conhecidas
   ignoreDifferences:
     - group: apps
       kind: StatefulSet
       jsonPointers:
         - /spec/volumeClaimTemplates
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[]?.clientConfig.caBundle'
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[]?.clientConfig.caBundle'
