@@ -1,0 +1,11 @@
+apiVersion: v2
+name: prometheus-stack
+description: Prometheus observabilidade stack
+type: application
+version: 1.0.0
+appVersion: "2.55.1"
+
+dependencies:
+  - name: kube-prometheus
+    version: 9.8.1
+    repository: https://charts.bitnami.com/bitnami

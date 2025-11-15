@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: observabilidade
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Projeto de Observabilidade - Prometheus, Grafana, Alertmanager
+  
+  # Repositórios permitidos
+  sourceRepos:
+    - https://github.com/lotechdevops/apps-argocd.git
+    - https://charts.bitnami.com/bitnami
+    - https://prometheus-community.github.io/helm-charts
+    - https://grafana.github.io/helm-charts
+  
+  # Destinos permitidos
+  destinations:
+    - namespace: observabilidade
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+  
+  # Permite criar qualquer recurso do Kubernetes
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  # Órfãos (recursos que existem no cluster mas não no Git)
+  orphanedResources:
+    warn: true
