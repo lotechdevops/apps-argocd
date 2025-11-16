@@ -4,17 +4,15 @@ fullnameOverride: prometheus
 # Prometheus Operator
 prometheusOperator:
   enabled: true
-  
+
 # Prometheus Instance
 prometheus:
   enabled: true
   
   prometheusSpec:
-    # Retenção de dados
     retention: 10d
     retentionSize: ""
     
-    # Recursos
     resources:
       requests:
         cpu: 200m
@@ -23,7 +21,6 @@ prometheus:
         cpu: 1000m
         memory: 2Gi
     
-    # Storage
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -33,12 +30,10 @@ prometheus:
             requests:
               storage: 8Gi
     
-    # External labels
     externalLabels:
       cluster: kubernetes
       environment: production
     
-    # Service Monitors
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
@@ -64,7 +59,6 @@ alertmanager:
   enabled: true
   
   alertmanagerSpec:
-    # Storage
     storage:
       volumeClaimTemplate:
         spec:
@@ -74,7 +68,6 @@ alertmanager:
             requests:
               storage: 2Gi
     
-    # Recursos
     resources:
       requests:
         cpu: 100m
@@ -83,7 +76,6 @@ alertmanager:
         cpu: 500m
         memory: 512Mi
   
-  # Configuração do Alertmanager
   config:
     global:
       resolve_timeout: 5m
@@ -112,16 +104,6 @@ alertmanager:
               *Instance:* {{ .CommonLabels.instance }}
               *Description:* {{ .CommonAnnotations.description }}
               *Status:* {{ .Status }}
-        telegram_configs:
-          - bot_token: 'YOUR_BOT_TOKEN'
-            chat_id: YOUR_CHAT_ID
-            send_resolved: true
-            message: |
-              🚨 *Alerta:* {{ .CommonLabels.alertname }}
-              *Gravidade:* {{ .CommonLabels.severity }}
-              *Instância:* {{ .CommonLabels.instance }}
-              *Descrição:* {{ .CommonAnnotations.description }}
-              *Status:* {{ .Status }}
   
   # Ingress para Alertmanager
   ingress:
@@ -142,10 +124,8 @@ alertmanager:
 # Grafana
 grafana:
   enabled: true
+  adminPassword: admin
   
-  adminPassword: admin  # ⚠️ MUDE ISSO!
-  
-  # Ingress para Grafana
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -154,19 +134,16 @@ grafana:
     hosts:
       - grafana.devopsr66.com
     path: /
-    pathType: Prefix
     tls:
       - secretName: devopsr66-tls
         hosts:
           - grafana.devopsr66.com
   
-  # Persistence
   persistence:
     enabled: true
     storageClassName: nfs-storage
     size: 2Gi
   
-  # Datasources (Prometheus já vem configurado automaticamente)
   sidecar:
     dashboards:
       enabled: true
@@ -175,7 +152,6 @@ grafana:
       enabled: true
       defaultDatasourceEnabled: true
   
-  # Recursos
   resources:
     requests:
       cpu: 100m
@@ -184,15 +160,14 @@ grafana:
       cpu: 500m
       memory: 512Mi
 
-# Node Exporter (coleta métricas dos nodes)
+# Exporters
 nodeExporter:
   enabled: true
 
-# Kube State Metrics (métricas do Kubernetes)
 kubeStateMetrics:
   enabled: true
 
-# Configurações de descoberta de componentes do Kubernetes
+# Componentes do Kubernetes
 kubeApiServer:
   enabled: true
 
@@ -213,12 +188,12 @@ kubeProxy:
   endpoints: []
 
 kubeEtcd:
-  enabled: false  # Geralmente não exposto
+  enabled: false
 
 coreDns:
   enabled: true
 
-# Default rules (alertas prontos)
+# Regras de alerta
 defaultRules:
   create: true
   rules:
