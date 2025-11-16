@@ -1,26 +1,22 @@
-# Configuração global
+# Configuração para kube-prometheus-stack (Prometheus Community)
+# Usa imagens oficiais do quay.io (sempre disponíveis)
+
+# Nome customizado
 fullnameOverride: prometheus
 
 # Prometheus Operator
 prometheusOperator:
   enabled: true
 
-# Prometheus Instance
+# Prometheus
 prometheus:
   enabled: true
   
   prometheusSpec:
+    # Retenção
     retention: 10d
-    retentionSize: ""
     
-    resources:
-      requests:
-        cpu: 200m
-        memory: 512Mi
-      limits:
-        cpu: 1000m
-        memory: 2Gi
-    
+    # Storage
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -30,15 +26,21 @@ prometheus:
             requests:
               storage: 8Gi
     
-    externalLabels:
-      cluster: kubernetes
-      environment: production
+    # Recursos
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
     
+    # Service Monitors (descoberta automática)
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
   
-  # Ingress para Prometheus
+  # Ingress
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -59,6 +61,7 @@ alertmanager:
   enabled: true
   
   alertmanagerSpec:
+    # Storage
     storage:
       volumeClaimTemplate:
         spec:
@@ -68,6 +71,7 @@ alertmanager:
             requests:
               storage: 2Gi
     
+    # Recursos
     resources:
       requests:
         cpu: 100m
@@ -76,6 +80,7 @@ alertmanager:
         cpu: 500m
         memory: 512Mi
   
+  # Configuração
   config:
     global:
       resolve_timeout: 5m
@@ -86,10 +91,6 @@ alertmanager:
       group_interval: 10s
       repeat_interval: 12h
       receiver: 'default'
-      routes:
-        - receiver: 'default'
-          matchers:
-            - alertname =~ ".*"
     
     receivers:
       - name: 'default'
@@ -103,9 +104,17 @@ alertmanager:
               *Severity:* {{ .CommonLabels.severity }}
               *Instance:* {{ .CommonLabels.instance }}
               *Description:* {{ .CommonAnnotations.description }}
-              *Status:* {{ .Status }}
+        telegram_configs:
+          - bot_token: 'YOUR_BOT_TOKEN'
+            chat_id: YOUR_CHAT_ID
+            send_resolved: true
+            message: |
+              🚨 *Alerta:* {{ .CommonLabels.alertname }}
+              *Gravidade:* {{ .CommonLabels.severity }}
+              *Instância:* {{ .CommonLabels.instance }}
+              *Descrição:* {{ .CommonAnnotations.description }}
   
-  # Ingress para Alertmanager
+  # Ingress
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -124,8 +133,10 @@ alertmanager:
 # Grafana
 grafana:
   enabled: true
-  adminPassword: admin
   
+  adminPassword: admin  # ⚠️ MUDE ISSO!
+  
+  # Ingress
   ingress:
     enabled: true
     ingressClassName: nginx
@@ -139,31 +150,24 @@ grafana:
         hosts:
           - grafana.devopsr66.com
   
+  # Storage
   persistence:
     enabled: true
     storageClassName: nfs-storage
     size: 2Gi
   
+  # Datasources (automático)
   sidecar:
     dashboards:
       enabled: true
-      defaultFolderName: "General"
     datasources:
       enabled: true
-      defaultDatasourceEnabled: true
-  
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
 
-# Exporters
+# Node Exporter
 nodeExporter:
   enabled: true
 
+# Kube State Metrics
 kubeStateMetrics:
   enabled: true
 
@@ -173,60 +177,37 @@ kubeApiServer:
 
 kubelet:
   enabled: true
-  namespace: kube-system
 
 kubeControllerManager:
   enabled: true
-  endpoints: []
 
 kubeScheduler:
   enabled: true
-  endpoints: []
 
 kubeProxy:
   enabled: true
-  endpoints: []
-
-kubeEtcd:
-  enabled: false
 
 coreDns:
   enabled: true
 
-# Regras de alerta
+# Regras de alerta padrão
 defaultRules:
   create: true
   rules:
     alertmanager: true
     etcd: false
-    configReloaders: true
     general: true
-    k8sContainerCpuUsageSecondsTotal: true
-    k8sContainerMemoryCache: true
-    k8sContainerMemoryRss: true
-    k8sContainerMemorySwap: true
-    k8sContainerResource: true
-    k8sContainerMemoryWorkingSetBytes: true
-    k8sPodOwner: true
+    k8s: true
     kubeApiserverAvailability: true
-    kubeApiserverBurnrate: true
-    kubeApiserverHistogram: true
     kubeApiserverSlos: true
-    kubeControllerManager: true
     kubelet: true
     kubeProxy: true
-    kubePrometheusGeneral: true
-    kubePrometheusNodeRecording: true
     kubernetesApps: true
     kubernetesResources: true
     kubernetesStorage: true
     kubernetesSystem: true
-    kubeSchedulerAlerting: true
-    kubeSchedulerRecording: true
     kubeStateMetrics: true
     network: true
     node: true
-    nodeExporterAlerting: true
-    nodeExporterRecording: true
     prometheus: true
     prometheusOperator: true

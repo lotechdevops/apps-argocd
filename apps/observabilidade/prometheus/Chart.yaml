@@ -1,11 +1,10 @@
 apiVersion: v2
 name: prometheus-stack
-description: Complete Prometheus monitoring stack with Operator, Grafana and Alertmanager
+description: Complete Prometheus monitoring stack
 type: application
 version: 1.0.0
-appVersion: "v0.79.0"
 
 dependencies:
   - name: kube-prometheus-stack
-    version: 79.5.0
+    version: 79.5.0  # Versão mais recente
     repository: https://prometheus-community.github.io/helm-charts
