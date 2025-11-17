@@ -3,13 +3,8 @@ kind: Application
 metadata:
   name: prometheus
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-  labels:
-    app.kubernetes.io/name: prometheus
-    app.kubernetes.io/component: monitoring
 spec:
-  project: observabilidade
+  project: observability
   
   source:
     repoURL: https://github.com/lotechdevops/apps-argocd.git
@@ -19,10 +14,12 @@ spec:
       releaseName: prometheus
       valueFiles:
         - values.yaml
+      # Adicionar skip de CRDs
+      skipCrds: false
   
   destination:
     server: https://kubernetes.default.svc
-    namespace: observabilidade
+    namespace: observability
   
   syncPolicy:
     automated:
@@ -32,24 +29,48 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - Replace=true
+      - ApplyOutOfSyncOnly=false
+      - RespectIgnoreDifferences=true
     retry:
-      limit: 5
+      limit: 10
       backoff:
-        duration: 5s
+        duration: 15s
         factor: 2
-        maxDuration: 3m
+        maxDuration: 5m
   
-  # Ignora diferenças conhecidas
+  # IMPORTANTE: Ignorar TODOS os recursos RBAC problemáticos
   ignoreDifferences:
+    # StatefulSet
     - group: apps
       kind: StatefulSet
       jsonPointers:
         - /spec/volumeClaimTemplates
+    
+    # Webhooks
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
       jqPathExpressions:
         - '.webhooks[]?.clientConfig.caBundle'
+    
     - group: admissionregistration.k8s.io
       kind: ValidatingWebhookConfiguration
       jqPathExpressions:
         - '.webhooks[]?.clientConfig.caBundle'
+    
+    # RBAC - ignorar TODOS os recursos RBAC
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: prometheus-kube-prometheus-admission
+    
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding  
+      name: prometheus-kube-prometheus-admission
+    
+    - group: rbac.authorization.k8s.io
+      kind: Role
+      name: prometheus-kube-prometheus-admission
+    
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
+      name: prometheus-kube-prometheus-admission
