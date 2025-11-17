@@ -273,7 +273,7 @@ alertmanager:
     hosts: []
     paths: /
     tls:
-    - secretName: "devopsr66-tls"
+    - secretName: devopsr66-tls
       hosts: alertmanager.devopsr66.com
   route:
     main:
@@ -1231,13 +1231,17 @@ prometheus:
     annotations: {}
     data: {}
   ingress:
-    enabled: false
-    ingressClassName: ""
-    annotations: {}
+    enabled: true
+    ingressClassName: "nginx"
+    annotations: 
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
     labels: {}
-    hosts: []
+    hosts:
     paths: []
-    tls: []
+    tls:
+    - secretName: devopsr66-tls
+      hosts: 
+        - prometheus.devopsr66.com
   route:
     main:
       enabled: false
@@ -1358,7 +1362,15 @@ prometheus:
     additionalRemoteWrite: []
     remoteWriteDashboards: false
     resources: {}
-    storageSpec: {}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+          storageClassName: "storage-nfs"
     volumes: []
     volumeMounts: []
     additionalScrapeConfigs: []
