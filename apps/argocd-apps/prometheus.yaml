@@ -4,10 +4,10 @@ metadata:
   name: prometheus
   namespace: argocd
 spec:
-  project: observability
+  project: observabilidade
   
   source:
-    repoURL: https://github.com/lotechdevops/apps-argocd.git
+    repoURL: git@github.com:lotechdevops/apps-argocd.git
     targetRevision: main
     path: apps/observabilidade/prometheus
     helm:
@@ -19,7 +19,7 @@ spec:
   
   destination:
     server: https://kubernetes.default.svc
-    namespace: observability
+    namespace: observabilidade
   
   syncPolicy:
     automated:

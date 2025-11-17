@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: observability
+  name: observabilidade
   namespace: argocd
 spec:
   description: Projeto de Observabilidade - Prometheus, Grafana, Alertmanager
@@ -14,7 +14,7 @@ spec:
   
   # Destinos permitidos
   destinations:
-    - namespace: observability
+    - namespace: observabilidade
       server: https://kubernetes.default.svc
     - namespace: kube-system
       server: https://kubernetes.default.svc
