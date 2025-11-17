@@ -270,11 +270,14 @@ alertmanager:
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
     labels: {}
-    hosts: []
-    paths: /
+    hosts: 
+      - alertmanager.devopsr66.com
+    paths: 
+      - /
     tls:
     - secretName: devopsr66-tls
-      hosts: alertmanager.devopsr66.com
+      hosts: 
+        - alertmanager.devopsr66.com
   route:
     main:
       enabled: false
@@ -377,7 +380,15 @@ alertmanager:
     logLevel: info
     replicas: 1
     retention: 120h
-    storage: {}
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+          storageClassName: "storage-nfs"
     externalUrl:
     routePrefix: /
     scheme: ""
@@ -420,7 +431,7 @@ alertmanager:
     annotations: {}
     data: {}
 grafana:
-  enabled: true
+  enabled: false
   namespaceOverride: ""
   forceDeployDatasources: false
   forceDeployDashboards: false
@@ -1236,8 +1247,10 @@ prometheus:
     annotations: 
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
     labels: {}
-    hosts:
-    paths: []
+    hosts: 
+      - prometheus.devopsr66.com
+    paths: 
+      - /
     tls:
     - secretName: devopsr66-tls
       hosts: 
