@@ -6,20 +6,17 @@ metadata:
 spec:
   description: Projeto de Observabilidade - Prometheus e Alertmanager
   
-  # Repositórios permitidos
   sourceRepos:
-    - https://github.com/lotechdevops/apps-argocd.git
+    - git@github.com:lotechdevops/apps-argocd.git
     - https://prometheus-community.github.io/helm-charts
     - https://grafana.github.io/helm-charts
   
-  # Destinos permitidos
   destinations:
     - namespace: observabilidade
       server: https://kubernetes.default.svc
     - namespace: kube-system
       server: https://kubernetes.default.svc
   
-  # Permite criar qualquer recurso do Kubernetes
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
@@ -28,6 +25,5 @@ spec:
     - group: '*'
       kind: '*'
   
-  # Órfãos (recursos que existem no cluster mas não no Git)
   orphanedResources:
     warn: true
