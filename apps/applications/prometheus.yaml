@@ -12,7 +12,7 @@ spec:
       helm:
         releaseName: prometheus
         valueFiles:
-          - $values/apps/observabilidade/prometheus/values.yaml
+          - $values/apps/values/prometheus/values.yaml
         skipCrds: false
     - repoURL: git@github.com:lotechdevops/apps-argocd.git
       targetRevision: main

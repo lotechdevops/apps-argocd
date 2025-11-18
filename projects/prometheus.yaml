@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: observabilidade
+  name: prometheus
   namespace: argocd
 spec:
-  description: Projeto de Observabilidade - Prometheus, Grafana, Alertmanager
+  description: Projeto de Observabilidade - Prometheus e Alertmanager
   
   # Repositórios permitidos
   sourceRepos:
