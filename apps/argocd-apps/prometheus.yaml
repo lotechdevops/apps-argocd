@@ -5,7 +5,6 @@ metadata:
   namespace: argocd
 spec:
   project: observabilidade
-  
   source:
     repoURL: git@github.com:lotechdevops/apps-argocd.git
     targetRevision: main
@@ -14,63 +13,23 @@ spec:
       releaseName: prometheus
       valueFiles:
         - values.yaml
-      # Adicionar skip de CRDs
-      skipCrds: false
-  
+      skipCrds: false  
   destination:
     server: https://kubernetes.default.svc
-    namespace: observabilidade
-  
+    namespace: observabilidade  
   syncPolicy:
     automated:
+      enabled: true
       prune: true
       selfHeal: true
-      allowEmpty: false
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-      - Replace=true
-      - ApplyOutOfSyncOnly=false
-      - RespectIgnoreDifferences=true
     retry:
       limit: 10
       backoff:
         duration: 15s
         factor: 2
         maxDuration: 5m
-  
-  # IMPORTANTE: Ignorar TODOS os recursos RBAC problemáticos
-  ignoreDifferences:
-    # StatefulSet
-    - group: apps
-      kind: StatefulSet
-      jsonPointers:
-        - /spec/volumeClaimTemplates
-    
-    # Webhooks
-    - group: admissionregistration.k8s.io
-      kind: MutatingWebhookConfiguration
-      jqPathExpressions:
-        - '.webhooks[]?.clientConfig.caBundle'
-    
-    - group: admissionregistration.k8s.io
-      kind: ValidatingWebhookConfiguration
-      jqPathExpressions:
-        - '.webhooks[]?.clientConfig.caBundle'
-    
-    # RBAC - ignorar TODOS os recursos RBAC
-    - group: rbac.authorization.k8s.io
-      kind: ClusterRole
-      name: prometheus-kube-prometheus-admission
-    
-    - group: rbac.authorization.k8s.io
-      kind: ClusterRoleBinding  
-      name: prometheus-kube-prometheus-admission
-    
-    - group: rbac.authorization.k8s.io
-      kind: Role
-      name: prometheus-kube-prometheus-admission
-    
-    - group: rbac.authorization.k8s.io
-      kind: RoleBinding
-      name: prometheus-kube-prometheus-admission
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - ServerSideApply=true
+      - Force=true
