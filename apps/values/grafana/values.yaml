@@ -212,7 +212,8 @@ extraVolumeMounts: []
 extraVolumes: []
 lifecycleHooks: {}
 plugins: []
-datasources: prometheus
+datasources: 
+  - name: Prometheus
 alerting: {}
 notifiers: {}
 dashboardProviders: {}
