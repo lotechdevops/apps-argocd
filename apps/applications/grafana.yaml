@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://grafana.github.io/helm-charts
       chart: grafana
-      targetRevision: 12.2.1
+      targetRevision: 10.1.4
       helm:
         releaseName: grafana
         valueFiles:
