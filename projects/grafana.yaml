@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: grafana
+  namespace: argocd
+spec:
+  description: Projeto de Observabilidade - Grafana
+  
+  sourceRepos:
+    - git@github.com:lotechdevops/apps-argocd.git
+    - https://grafana.github.io/helm-charts
+  
+  destinations:
+    - namespace: observabilidade
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+  
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  orphanedResources:
+    warn: true
