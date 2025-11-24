@@ -221,90 +221,7 @@ alertmanager:
     enabled: false
     minAvailable: 1
     unhealthyPodEvictionPolicy: AlwaysAllow
-  config:
-    global:
-      resolve_timeout: 5m
-      slack_api_url_file: /etc/alertmanager/secrets/slack-webhook-geral    
-    inhibit_rules:
-      - source_matchers:
-          - 'severity = critical'
-        target_matchers:
-          - 'severity =~ warning|info'
-        equal: ['namespace', 'alertname']    
-    route:
-      receiver: 'telegram-default'
-      group_by: ['alertname', 'namespace', 'severity']
-      group_wait: 10s
-      group_interval: 10s
-      repeat_interval: 12h      
-      routes:
-        - receiver: 'null'
-          matchers:
-            - alertname = "Watchdog"
-          continue: false
-        
-        - receiver: 'critical-all'
-          matchers:
-            - severity = "critical"
-          continue: false
-        
-        - receiver: 'telegram-warning'
-          matchers:
-            - severity = "warning"
-          continue: false    
-    receivers:
-      - name: 'null'      
-      - name: 'telegram-default'
-        telegram_configs:
-          - bot_token_file: /etc/alertmanager/secrets/telegram-token
-            chat_id_file: /etc/alertmanager/secrets/telegram-chat-id  # ⚡ Do secret
-            parse_mode: 'HTML'
-            message: |-
-              ℹ️ <b>ALERTA</b>
-              
-              <b>Nome:</b> {{ .CommonLabels.alertname }}
-              <b>Namespace:</b> {{ .CommonLabels.namespace }}
-              
-              {{ range .Alerts }}
-              {{ .Annotations.description }}
-              {{ end }}
-            send_resolved: true      
-      - name: 'critical-all'
-        telegram_configs:
-          - bot_token_file: /etc/alertmanager/secrets/telegram-token
-            chat_id_file: /etc/alertmanager/secrets/telegram-chat-id  # ⚡ Do secret
-            parse_mode: 'HTML'
-            message: |-
-              🚨 <b>ALERTA CRÍTICO</b> 🚨
-              
-              <b>Nome:</b> {{ .CommonLabels.alertname }}
-              <b>Namespace:</b> {{ .CommonLabels.namespace }}
-              
-              {{ range .Alerts }}
-              <b>Descrição:</b> {{ .Annotations.description }}
-              {{ end }}
-            send_resolved: true        
-        slack_configs:
-          - channel: 'alertmanager'
-            username: 'Alertmanager'
-            icon_emoji: ':rotating_light:'
-            title: '🚨 {{ .CommonLabels.alertname }}'
-            text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
-            send_resolved: true      
-      - name: 'telegram-warning'
-        telegram_configs:
-          - bot_token_file: /etc/alertmanager/secrets/telegram-token
-            chat_id_file: /etc/alertmanager/secrets/telegram-chat-id  # ⚡ Do secret
-            parse_mode: 'HTML'
-            message: |-
-              ⚠️ <b>AVISO</b>
-              
-              <b>Nome:</b> {{ .CommonLabels.alertname }}
-              
-              {{ range .Alerts }}
-              {{ .Annotations.description }}
-              {{ end }}
-            send_resolved: true
+  config: {}
   stringConfig: ""
   tplConfig: false
   templateFiles: {}
@@ -410,7 +327,8 @@ alertmanager:
       tag: v0.29.0
       sha: ""
       pullPolicy: IfNotPresent
-    useExistingSecret: false
+    useExistingSecret: true
+    configSecret: alertmanager-config
     secrets:
       - alertmanager-slack-webhooks
       - alertmanager-telegram-chats
