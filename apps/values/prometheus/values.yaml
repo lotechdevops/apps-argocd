@@ -224,43 +224,87 @@ alertmanager:
   config:
     global:
       resolve_timeout: 5m
+      slack_api_url_file: /etc/alertmanager/secrets/slack-webhook-geral    
     inhibit_rules:
       - source_matchers:
           - 'severity = critical'
         target_matchers:
           - 'severity =~ warning|info'
-        equal:
-          - 'namespace'
-          - 'alertname'
-      - source_matchers:
-          - 'severity = warning'
-        target_matchers:
-          - 'severity = info'
-        equal:
-          - 'namespace'
-          - 'alertname'
-      - source_matchers:
-          - 'alertname = InfoInhibitor'
-        target_matchers:
-          - 'severity = info'
-        equal:
-          - 'namespace'
-      - target_matchers:
-          - 'alertname = InfoInhibitor'
+        equal: ['namespace', 'alertname']    
     route:
-      group_by: ['namespace']
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 12h
-      receiver: 'null'
+      receiver: 'telegram-default'
+      group_by: ['alertname', 'namespace', 'severity']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h      
       routes:
-      - receiver: 'null'
-        matchers:
-          - alertname = "Watchdog"
+        - receiver: 'null'
+          matchers:
+            - alertname = "Watchdog"
+          continue: false
+        
+        - receiver: 'critical-all'
+          matchers:
+            - severity = "critical"
+          continue: false
+        
+        - receiver: 'telegram-warning'
+          matchers:
+            - severity = "warning"
+          continue: false    
     receivers:
-    - name: 'null'
-    templates:
-    - '/etc/alertmanager/config/*.tmpl'
+      - name: 'null'      
+      - name: 'telegram-default'
+        telegram_configs:
+          - bot_token_file: /etc/alertmanager/secrets/telegram-token
+            chat_id_file: /etc/alertmanager/secrets/telegram-chat-id  # ⚡ Do secret
+            parse_mode: 'HTML'
+            message: |-
+              ℹ️ <b>ALERTA</b>
+              
+              <b>Nome:</b> {{ .CommonLabels.alertname }}
+              <b>Namespace:</b> {{ .CommonLabels.namespace }}
+              
+              {{ range .Alerts }}
+              {{ .Annotations.description }}
+              {{ end }}
+            send_resolved: true      
+      - name: 'critical-all'
+        telegram_configs:
+          - bot_token_file: /etc/alertmanager/secrets/telegram-token
+            chat_id_file: /etc/alertmanager/secrets/telegram-chat-id  # ⚡ Do secret
+            parse_mode: 'HTML'
+            message: |-
+              🚨 <b>ALERTA CRÍTICO</b> 🚨
+              
+              <b>Nome:</b> {{ .CommonLabels.alertname }}
+              <b>Namespace:</b> {{ .CommonLabels.namespace }}
+              
+              {{ range .Alerts }}
+              <b>Descrição:</b> {{ .Annotations.description }}
+              {{ end }}
+            send_resolved: true        
+        slack_configs:
+          - channel: 'alertmanager'
+            username: 'Alertmanager'
+            icon_emoji: ':rotating_light:'
+            title: '🚨 {{ .CommonLabels.alertname }}'
+            text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+            send_resolved: true      
+      - name: 'telegram-warning'
+        telegram_configs:
+          - bot_token_file: /etc/alertmanager/secrets/telegram-token
+            chat_id_file: /etc/alertmanager/secrets/telegram-chat-id  # ⚡ Do secret
+            parse_mode: 'HTML'
+            message: |-
+              ⚠️ <b>AVISO</b>
+              
+              <b>Nome:</b> {{ .CommonLabels.alertname }}
+              
+              {{ range .Alerts }}
+              {{ .Annotations.description }}
+              {{ end }}
+            send_resolved: true
   stringConfig: ""
   tplConfig: false
   templateFiles: {}
@@ -367,7 +411,9 @@ alertmanager:
       sha: ""
       pullPolicy: IfNotPresent
     useExistingSecret: false
-    secrets: []
+    secrets:
+      - alertmanager-slack-webhooks
+      - alertmanager-telegram-chats
     automountServiceAccountToken: true
     configMaps: []
     web: {}
