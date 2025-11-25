@@ -331,7 +331,7 @@ alertmanager:
     configSecret: alertmanager-config
     secrets:
       - alertmanager-slack-webhooks
-      - alertmanager-telegram-chats
+      - alertmanager-config
     automountServiceAccountToken: true
     configMaps: []
     web: {}
