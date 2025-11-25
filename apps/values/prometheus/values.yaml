@@ -326,7 +326,6 @@ alertmanager:
       pullPolicy: IfNotPresent
     useExistingSecret: true
     secrets:
-      - alertmanager-telegram-chats
       - alertmanager-slack-webhooks
       - alertmanager-config
     automountServiceAccountToken: true
