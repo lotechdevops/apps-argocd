@@ -221,9 +221,6 @@ alertmanager:
     enabled: false
     minAvailable: 1
     unhealthyPodEvictionPolicy: AlwaysAllow
-  stringConfig: ""
-  tplConfig: false
-  templateFiles: {}
   ingress:
     enabled: true
     ingressClassName: "nginx"
@@ -389,8 +386,6 @@ alertmanager:
     clusterLabel: ""
     forceEnableClusterMode: false
     minReadySeconds: 0
-    additionalConfig: {}
-    additionalConfigString: ""
   extraSecret:
     annotations: {}
     data: {}
