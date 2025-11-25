@@ -251,7 +251,6 @@ alertmanager:
             value: /
       filters: []
       additionalRules: []
-  configSecret: alertmanager-config
   secret:
     annotations: {}
   ingressPerReplica:
@@ -324,16 +323,13 @@ alertmanager:
       tag: v0.29.0
       sha: ""
       pullPolicy: IfNotPresent
-    useExistingSecret: true
+    configSecret: alertmanager-config
     secrets:
       - alertmanager-slack-webhooks
-      - alertmanager-config
+      - alertmanager-telegram-chats
     automountServiceAccountToken: true
     configMaps: []
     web: {}
-    alertmanagerConfigSelector: {}
-    alertmanagerConfigNamespaceSelector: {}
-    alertmanagerConfiguration: {}
     alertmanagerConfigMatcherStrategy: {}
     additionalArgs: []
     logFormat: logfmt
@@ -1347,8 +1343,6 @@ prometheus:
     additionalScrapeConfigs: []
     additionalScrapeConfigsSecret: {}
     additionalPrometheusSecretsAnnotations: {}
-    additionalAlertManagerConfigs: []
-    additionalAlertManagerConfigsSecret: {}
     additionalAlertRelabelConfigs: []
     additionalAlertRelabelConfigsSecret: {}
     securityContext:
