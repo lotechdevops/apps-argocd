@@ -221,7 +221,6 @@ alertmanager:
     enabled: false
     minAvailable: 1
     unhealthyPodEvictionPolicy: AlwaysAllow
-  config: {}
   stringConfig: ""
   tplConfig: false
   templateFiles: {}
@@ -255,6 +254,7 @@ alertmanager:
             value: /
       filters: []
       additionalRules: []
+  configSecret: alertmanager-config
   secret:
     annotations: {}
   ingressPerReplica:
@@ -328,7 +328,6 @@ alertmanager:
       sha: ""
       pullPolicy: IfNotPresent
     useExistingSecret: true
-    configSecret: alertmanager-config
     secrets:
       - alertmanager-slack-webhooks
       - alertmanager-config
