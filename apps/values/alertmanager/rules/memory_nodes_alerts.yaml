@@ -11,7 +11,7 @@ spec:
       rules:
         - alert: HighMemoryUsage
           expr: >
-            (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+            (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 7
           for: 2m
           labels:
             severity: critical
