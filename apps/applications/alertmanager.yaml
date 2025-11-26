@@ -6,7 +6,7 @@ metadata:
 spec:
   project: alertmanager
   source:
-    repoURL: https://github.com/seu-usuario/seu-repo.git  # Alterar para seu repo
+    repoURL: git@github.com:lotechdevops/apps-argocd.git  # Alterar para seu repo
     targetRevision: main
     path: apps/values/alertmanager
   destination:
@@ -14,7 +14,16 @@ spec:
     namespace: observabilidade
   syncPolicy:
     automated:
+      enabled: true
       prune: true
-      selfHeal: true
+      selfHeal: true  
+    retry:
+      limit: 5
+      backoff:
+        duration: "5s"
+        factor: 2
+        maxDuration: "3m"
     syncOptions:
       - CreateNamespace=true
+      - PruneLast=true
+      - ServerSideApply=true
