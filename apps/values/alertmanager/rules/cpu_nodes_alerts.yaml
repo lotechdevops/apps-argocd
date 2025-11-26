@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cpu-nodes-alerts
+  namespace: observabilidade
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: cpu-nodes-alerts
+      rules:
+        - alert: HighCPUUsage
+          expr: >
+            100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 70
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CPU alta na instância {{ $labels.instance }}"
+            description: "CPU da instância {{ $labels.instance }} está em {{ printf \"%.2f\" $value }}% de uso"
+            impact: "Performance degradada do node"
+            action: "Verificar processos consumindo CPU com 'top' ou 'htop'"

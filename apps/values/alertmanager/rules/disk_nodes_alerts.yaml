@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: disk-usage-alert
+  namespace: observabilidade
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: disk-usage-alerts
+      rules:
+        - alert: HighDiskUsage
+          expr: >
+            100 - ((node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"} * 100) / node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"}) > 80
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disco cheio na instância {{ $labels.instance }}"
+            description: "Uso de disco em {{ $labels.instance }} atingiu {{ printf \"%.2f\" $value }}% (mountpoint /)"
+            impact: "Risco de falha em gravações e logs"
+            action: "Limpar arquivos antigos, logs ou expandir disco"
