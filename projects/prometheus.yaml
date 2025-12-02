@@ -9,7 +9,6 @@ spec:
   sourceRepos:
     - git@github.com:lotechdevops/apps-argocd.git
     - https://prometheus-community.github.io/helm-charts
-    - https://grafana.github.io/helm-charts
   
   destinations:
     - namespace: observabilidade

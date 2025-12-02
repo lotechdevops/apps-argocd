@@ -1276,7 +1276,7 @@ prometheus:
     image:
       registry: quay.io
       repository: prometheus/prometheus
-      tag: v3.7.3
+      tag: v30.7.3
       sha: ""
       pullPolicy: IfNotPresent
     tolerations: []

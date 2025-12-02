@@ -5,7 +5,10 @@ metadata:
   namespace: argocd
 spec:
   project: prometheus
+  
+  # Múltiplos sources: Helm Chart oficial + Values do Git
   sources:
+    # Source 1: Helm Chart oficial do Prometheus
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
       targetRevision: 79.5.0
@@ -14,17 +17,23 @@ spec:
         valueFiles:
           - $values/apps/values/prometheus/values.yaml
         skipCrds: false
+    
+    # Source 2: Repositório Git com os values customizados
     - repoURL: git@github.com:lotechdevops/apps-argocd.git
       targetRevision: main
       ref: values
+  
+  # Destino no cluster
   destination:
     server: https://kubernetes.default.svc
     namespace: observabilidade
+  
+  # Política de sincronização
   syncPolicy:
     automated:
       enabled: true
       prune: true
-      selfHeal: true  
+      selfHeal: true
     retry:
       limit: 5
       backoff:
