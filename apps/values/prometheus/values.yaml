@@ -1314,7 +1314,7 @@ prometheus:
       outOfOrderTimeWindow: 0s
     walCompression: true
     paused: false
-    replicas: "isso-nao-e-um-numero"
+    replicas: 1
     shards: 1
     logLevel: info
     logFormat: logfmt
