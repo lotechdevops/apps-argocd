@@ -1,0 +1,87 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: observabilidade-stack
+  namespace: argocd
+spec:
+  # Estratégia de sincronização global
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  
+  generators:
+  - list:
+      elements:
+      # Prometheus
+      - app: prometheus
+        project: prometheus
+        chart: kube-prometheus-stack
+        chartVersion: 79.5.0
+        helmRepo: https://prometheus-community.github.io/helm-charts
+        valuesPath: apps/values/prometheus/values.yaml
+        namespace: observabilidade
+      
+      # Grafana
+      - app: grafana
+        project: grafana
+        chart: grafana
+        chartVersion: 10.1.4
+        helmRepo: https://grafana.github.io/helm-charts
+        valuesPath: apps/values/grafana/values.yaml
+        namespace: observabilidade
+  
+  template:
+    metadata:
+      name: '{{.app}}'
+      labels:
+        app: '{{.app}}'
+        stack: observabilidade
+      annotations:
+        # Notificações no Slack
+        notifications.argoproj.io/subscribe.on-sync-succeeded.slack: "C0A138KGJBF"
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: "C0A138KGJBF"
+        notifications.argoproj.io/subscribe.on-health-degraded.slack: "C0A138KGJBF"
+        notifications.argoproj.io/subscribe.on-out-of-sync.slack: "C0A138KGJBF"
+        notifications.argoproj.io/subscribe.on-deployed.slack: "C0A138KGJBF"
+    
+    spec:
+      # Project específico de cada app
+      project: '{{.project}}'
+      
+      # Múltiplos sources: Helm Chart + Values do Git
+      sources:
+        # Source 1: Helm Chart oficial
+        - repoURL: '{{.helmRepo}}'
+          chart: '{{.chart}}'
+          targetRevision: '{{.chartVersion}}'
+          helm:
+            releaseName: '{{.app}}'
+            valueFiles:
+              - $values/{{.valuesPath}}
+            skipCrds: false
+        
+        # Source 2: Values customizados no Git
+        - repoURL: git@github.com:lotechdevops/apps-argocd.git
+          targetRevision: main
+          ref: values
+      
+      # Destino no cluster
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      
+      # Política de sincronização
+      syncPolicy:
+        automated:
+          enabled: true
+          prune: true
+          selfHeal: true
+        retry:
+          limit: 5
+          backoff:
+            duration: "5s"
+            factor: 2
+            maxDuration: "3m"
+        syncOptions:
+          - CreateNamespace=true
+          - PruneLast=true
+          - ServerSideApply=true
